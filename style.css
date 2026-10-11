@@ -1,0 +1,231 @@
+/* ==========================================================
+   Image Slider: style.css
+   ========================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #e8edf5;
+  background: #0f172a;               /* dark navy page */
+}
+
+.page {
+  width: min(100% - 2rem, 1000px);   /* fluid parent footprint */
+  margin-inline: auto;
+  padding-block: 3rem;
+}
+
+.page h1 {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 600;
+}
+
+/* ==========================================================
+   Slider component
+   ========================================================== */
+
+.slider {
+  --slider-duration: 500ms;
+  --slider-easing: cubic-bezier(0.65, 0, 0.35, 1);
+  --slider-control-bg: rgba(15, 30, 60, 0.85);
+  --slider-control-bg-hover: rgba(30, 58, 110, 0.95);
+
+  position: relative;                /* anchor for arrows, dots, badge */
+  width: 100%;                       /* flexes with the parent */
+  aspect-ratio: 16 / 10;             /* height follows width at every breakpoint */
+  overflow: hidden;                  /* viewport mask: hides off-screen slides */
+  border-radius: 16px;
+  background: #0b1222;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.slider:focus-visible {
+  outline: 3px solid #4c9ffe;
+  outline-offset: 4px;
+}
+
+/* ---------- Sliding track ---------- */
+
+.slider__track {
+  display: flex;                     /* slides sit side by side */
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  transform: translateX(0);          /* JS sets this; -100% = exactly one slide */
+  transition: transform var(--slider-duration) var(--slider-easing);
+  will-change: transform;            /* GPU layer */
+}
+
+.slider__slide {
+  flex: 0 0 100%;                    /* one viewport wide, never shrinks */
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+}
+
+/* ---------- Asset scaling ---------- */
+
+.slider__slide img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  object-fit: cover;                 /* fill the frame, keep ratio, crop overflow */
+  object-position: center;
+  -webkit-user-drag: none;
+}
+
+/* ---------- Arrow buttons ---------- */
+
+.slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--slider-control-bg);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.slider__arrow--prev { left: 15px; }
+.slider__arrow--next { right: 15px; }
+
+.slider__arrow:hover {
+  background: var(--slider-control-bg-hover);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.slider__arrow:focus-visible,
+.slider__dot:focus-visible {
+  outline: 3px solid #4c9ffe;
+  outline-offset: 2px;
+}
+
+.slider__arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* ---------- "Image X of Y" badge ---------- */
+
+.slider__counter {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 2;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  color: #fff;
+  background: var(--slider-control-bg);
+  pointer-events: none;
+}
+
+/* ---------- Indicator dots (no background bar) ---------- */
+
+.slider__dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  transform: translateX(-50%);
+}
+
+.slider__dot {
+  position: relative;
+  width: 24px;                       /* comfortable hit area */
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider__dot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.45);   /* keeps dots visible on bright photos */
+  transform: translate(-50%, -50%);
+  transition: background-color 250ms ease, width 250ms ease, height 250ms ease;
+}
+
+.slider__dot:hover::before {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.slider__dot--active::before {
+  width: 18px;                       /* active dot is bigger and solid white */
+  height: 18px;
+  background: #fff;
+}
+
+/* ==========================================================
+   Responsive adjustments
+   ========================================================== */
+
+@media (max-width: 600px) {
+  .page { padding-block: 1.5rem; }
+
+  .slider {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+  }
+
+  .slider__arrow {
+    width: 42px;
+    height: 42px;
+  }
+
+  .slider__arrow svg { width: 20px; height: 20px; }
+  .slider__arrow--prev { left: 8px; }
+  .slider__arrow--next { right: 8px; }
+
+  .slider__counter {
+    top: 10px;
+    right: 10px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .slider__track { transition-duration: 0ms; }
+  .slider__dot::before,
+  .slider__arrow { transition: none; }
+}
